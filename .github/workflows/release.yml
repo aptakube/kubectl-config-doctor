@@ -46,16 +46,16 @@ jobs:
       - name: Create tar.gz archive (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          tar -czvf ${{ matrix.asset_name }} ${{ matrix.artifact_name }}
+          tar -czvf ${{ matrix.asset_name }} ${{ matrix.target }}/release/${{ matrix.bin_name }}
         
       - name: Create zip archive (Windows)
         if: runner.os == 'Windows'
         run: |
-          Compress-Archive -Path  ${{ matrix.artifact_name }} -DestinationPath ${{ matrix.asset_name }}
+          Compress-Archive -Path ${{ matrix.target }}/release/${{ matrix.bin_name }} -DestinationPath ${{ matrix.asset_name }}
           
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
-          file: ${{ matrix.target }}/release/${{ matrix.artifact_name }}
+          file: ${{ matrix.asset_name }}
           asset_name: ${{ matrix.asset_name }}
           tag: ${{ github.ref }}

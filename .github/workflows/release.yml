@@ -14,19 +14,19 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            bin_name: kubectl-config-doctor
+            bin_name: kubectl-config_doctor
             asset_name: kubectl-config-doctor-linux-amd64.tar.gz
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            bin_name: kubectl-config-doctor.exe
+            bin_name: kubectl-config_doctor.exe
             asset_name: kubectl-config-doctor-windows-amd64.zip
           - os: macos-latest
             target: aarch64-apple-darwin
-            bin_name: kubectl-config-doctor
+            bin_name: kubectl-config_doctor
             asset_name: kubectl-config-doctor-darwin-arm64.tar.gz
           - os: macos-latest
             target: x86_64-apple-darwin
-            bin_name: kubectl-config-doctor
+            bin_name: kubectl-config_doctor
             asset_name: kubectl-config-doctor-darwin-amd64.tar.gz
 
     steps:
@@ -46,7 +46,7 @@ jobs:
       - name: Create tar.gz archive (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          tar -czvf ${{ matrix.asset_name }} target/${{ matrix.target }}/release/${{ matrix.bin_name }}
+          tar -czvf ${{ matrix.asset_name }} -C target/${{ matrix.target }}/release ${{ matrix.bin_name }}
         
       - name: Create zip archive (Windows)
         if: runner.os == 'Windows'

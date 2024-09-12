@@ -1,7 +1,11 @@
 [package]
 name = "kubectl-config-doctor"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
+
+[[bin]]
+name = "kubectl-config_doctor"
+path = "src/main.rs"
 
 [dependencies]
 aws-lc-rs = "1.9.0"

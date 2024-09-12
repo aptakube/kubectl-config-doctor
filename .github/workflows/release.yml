@@ -1,4 +1,4 @@
-name: Rust CLI Build
+name: Release
 
 on:
   push:

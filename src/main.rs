@@ -1,6 +1,6 @@
 use std::{env, error::Error, ffi::OsString, path::PathBuf};
 
-use colorize::AnsiColor;
+use colored::Colorize;
 use kube::{config::{Config, KubeConfigOptions, Kubeconfig}, Client};
 
 #[tokio::main]
@@ -43,8 +43,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         Err(err) => println!("{} {}", red_cross(), err.to_string().red())
     }
-    println!("");
-
     Ok(())
 }
 
@@ -68,8 +66,8 @@ async fn inspect_context(kubeconfig: &Kubeconfig, context: String) {
             };
 
             println!(" - API Server: {} {} - {}", config.cluster_url, match &config.proxy_url { 
-                Some(url) => format!("(proxy: {})", url.to_string()).grey(),
-                None => "(no proxy)".to_string().grey(),
+                Some(url) => format!("(proxy: {})", url.to_string()),
+                None => "(no proxy)".to_string(),
             }, match connected {
                 Ok(_) => "connected".green(),
                 Err(err) => long_error(err).red()
@@ -97,7 +95,7 @@ fn long_error(err: kube::Error) -> String {
 fn print_env_var(name: &str) {
     println!("- {}: {}", name, match env::var(name) {
         Ok(value) => value,
-        Err(_) => "<not set>".to_string().magenta(),
+        Err(_) => "<not set>".to_string(),
     });
 }
 

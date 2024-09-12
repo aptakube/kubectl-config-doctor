@@ -4,13 +4,16 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-colorize = "0.1.0"
+aws-lc-rs = "1.9.0"
+colored = "2.1.0"
 home = "0.5.9"
 k8s-openapi = { version = "0.22.0", features = ["latest"] }
-kube = { version = "0.94.1", features = ["config", "client"] }
+kube = { version = "0.94.1", features = ["config", "client", "rustls-tls", "aws-lc-rs", "socks5", "http-proxy", "oidc"] }
 tokio = { version = "1.40.0", features = ["full"] }
 
 [profile.release]
-strip = true
-opt-level = "z"
+panic = "abort"
 codegen-units = 1
+lto = true 
+opt-level = 3
+strip = true 

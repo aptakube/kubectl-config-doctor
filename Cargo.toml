@@ -8,3 +8,4 @@ colorize = "0.1.0"
 home = "0.5.9"
 k8s-openapi = { version = "0.22.0", features = ["latest"] }
 kube = { version = "0.94.1", features = ["config", "client"] }
+tokio = { version = "1.40.0", features = ["full"] }

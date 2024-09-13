@@ -1,7 +1,20 @@
 [package]
 name = "kubectl-config-doctor"
+authors = ["Guilherme Oenning <goenning@aptakube.com>"]
+description = "Kubectl plugin to validate kubeconfigs"
 version = "0.2.0"
 edition = "2021"
+keywords = ["kubectl"]
+license = "MIT"
+homepage = "https://aptakube.com/kubectl-config-doctor"
+repository = "https://github.com/aptakube/kubectl-config-doctor"
+readme = "README.md"
+include = [
+    "/Cargo.toml",
+    "/LICENSE",
+    "/README.md",
+    "/src/**",
+]
 
 [[bin]]
 name = "kubectl-config_doctor"
@@ -11,8 +24,10 @@ path = "src/main.rs"
 aws-lc-rs = "1.9.0"
 colored = "2.1.0"
 home = "0.5.9"
+http = "1.1.0"
 k8s-openapi = { version = "0.22.0", features = ["latest"] }
 kube = { version = "0.94.1", features = ["config", "client", "rustls-tls", "aws-lc-rs", "socks5", "http-proxy", "oidc"] }
+secrecy = "0.8.0"
 tokio = { version = "1.40.0", features = ["full"] }
 
 [profile.release]

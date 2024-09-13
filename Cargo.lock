@@ -732,8 +732,10 @@ dependencies = [
  "aws-lc-rs",
  "colored",
  "home",
+ "http",
  "k8s-openapi",
  "kube",
+ "secrecy",
  "tokio",
 ]
 

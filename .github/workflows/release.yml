@@ -42,13 +42,15 @@ jobs:
       - name: Create tar.gz archive (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          tar -czvf ${{ matrix.asset_name }} -C target/${{ matrix.target }}/release kubectl-config-doctor
+          cp LICENSE target/${{ matrix.target }}/release/
+          tar -czvf ${{ matrix.asset_name }} -C target/${{ matrix.target }}/release kubectl-config-doctor LICENSE
         
       - name: Create zip archive (Windows)
         if: runner.os == 'Windows'
         run: |
-          Compress-Archive -Path target/${{ matrix.target }}/release/kubectl-config-doctor.exe -DestinationPath ${{ matrix.asset_name }}
-          
+          cp LICENSE target/${{ matrix.target }}/release/
+          Compress-Archive -Path target/${{ matrix.target }}/release/kubectl-config-doctor.exe, target/${{ matrix.target }}/release/LICENSE -DestinationPath ${{ matrix.asset_name }}
+
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:

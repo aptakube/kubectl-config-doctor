@@ -42,14 +42,12 @@ jobs:
       - name: Create tar.gz archive (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          cp target/${{ matrix.target }}/release/kubectl-config-doctor ./kubectl-config_doctor
-          tar -czvf ${{ matrix.asset_name }} ./kubectl-config_doctor
+          tar -czvf ${{ matrix.asset_name }} -C target/${{ matrix.target }}/release kubectl-config-doctor
         
       - name: Create zip archive (Windows)
         if: runner.os == 'Windows'
         run: |
-          Rename-Item -Path target/${{ matrix.target }}/release/kubectl-config-doctor.exe -NewName "./kubectl-config_doctor.exe"
-          Compress-Archive -Path ./kubectl-config_doctor.exe -DestinationPath ${{ matrix.asset_name }}
+          Compress-Archive -Path target/${{ matrix.target }}/release/kubectl-config-doctor.exe -DestinationPath ${{ matrix.asset_name }}
           
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
@@ -57,3 +55,11 @@ jobs:
           file: ${{ matrix.asset_name }}
           asset_name: ${{ matrix.asset_name }}
           tag: ${{ github.ref }}
+  sha256sum:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Add Checksums
+        uses: wangzuo/action-release-checksums@v1

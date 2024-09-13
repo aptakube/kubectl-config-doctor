@@ -7,10 +7,16 @@ A `kubectl` plugin to validate and test kubeconfigs.
 
 ## 💻 Install
 
-`kubectl-config-doctor` can be installed using [Krew](https://github.com/kubernetes-sigs/krew):
+### Via [Krew](https://github.com/kubernetes-sigs/krew) (Recommended):
 
 ```shell
 $ kubectl krew install config-doctor
+```
+
+### Via [Cargo](https://doc.rust-lang.org/stable/cargo/):
+
+```shell
+$ cargo install kubectl-config-doctor
 ```
 
 ## 📝 Intro

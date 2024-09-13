@@ -55,11 +55,3 @@ jobs:
           file: ${{ matrix.asset_name }}
           asset_name: ${{ matrix.asset_name }}
           tag: ${{ github.ref }}
-  sha256sum:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Add Checksums
-        uses: wangzuo/action-release-checksums@v1

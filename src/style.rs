@@ -29,18 +29,11 @@ pub fn print_title(title: &str) {
     println!("{}", title.bold());
 }
 
-pub fn print_error(err: kube::Error) {
-    let mut error_msg = err.to_string();
-    let mut source = err.source();
-    while let Some(err_source) = source {
-        error_msg.push_str(&format!(": {}", err_source));
-        source = err_source.source();
-    }
-
-    println!("{} {}", red_cross(), error_msg.red())
+pub fn print_error(err: String) {
+    println!("{} {}", red_cross(), err.red());
 }
 
-pub fn print_kubeconfigerror(err: KubeconfigError) {
+pub fn expand_kubeerror(err: kube::Error) -> String {
     let mut error_msg = err.to_string();
     let mut source = err.source();
     while let Some(err_source) = source {
@@ -48,5 +41,16 @@ pub fn print_kubeconfigerror(err: KubeconfigError) {
         source = err_source.source();
     }
 
-    println!("{} {}", red_cross(), error_msg.red())
+    return error_msg;
+}
+
+pub fn expand_kubeconfigerror(err: KubeconfigError) -> String {
+    let mut error_msg = err.to_string();
+    let mut source = err.source();
+    while let Some(err_source) = source {
+        error_msg.push_str(&format!(": {}", err_source));
+        source = err_source.source();
+    }
+
+    return error_msg;
 }

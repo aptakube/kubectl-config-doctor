@@ -1,10 +1,11 @@
 use std::{env, path::PathBuf, time::Duration};
 
 use colored::Colorize;
+use http::Request;
 use kube::{config::{AuthInfo, Cluster, KubeConfigOptions, Kubeconfig}, Client, Config};
 use secrecy::{ExposeSecret, SecretString};
 
-use crate::style::{green_check, print_error, print_kubeconfigerror, red_cross, ColorizeExt};
+use crate::style::{expand_kubeconfigerror, expand_kubeerror, green_check, print_error, red_cross, ColorizeExt};
 
 pub fn version() -> &'static str {
     return env!("CARGO_PKG_VERSION");
@@ -92,60 +93,103 @@ pub async fn inspect_context(kubeconfig: &Kubeconfig, context: String) {
     }).await;
 
     match config {
-        Ok(mut config) => {
-            config.connect_timeout = Some(std::time::Duration::from_secs(3));
-
-            match &config.proxy_url {
-                Some(url) => {
-                    let reachable = is_url_reachable(url).await;
-                    println!("{} {}: {} - {}", match reachable { 
-                        true => green_check(),
-                        false => red_cross()
-                    }, "Proxy".grey(), url.to_string(), match reachable {
-                        true => "reachable".green(),
-                        false => "unreachable".red()
-                    });
-                },
-                None => println!("{} {}: {}", green_check(), "Proxy".grey(), "<not set>".light_grey())
-            }
-
-            let reachable = is_url_reachable(&config.cluster_url).await;
-            println!("{} {}: {} - {}", match reachable { 
-                true => green_check(),
-                false => red_cross()
-            }, "Server URL".grey(), config.cluster_url.to_string(), match reachable {
-                true => "reachable".green(),
-                false => "unreachable".red()
-            });
-
-
-            config.connect_timeout = Some(std::time::Duration::from_secs(3));
-            let version = match Client::try_from(config) {
-                Ok(c) => c.apiserver_version().await,
-                Err(err) => Err(err)
-            };
-
-            match version {
-                Ok(info) => println!("{} {} v{}.{} - {}", green_check(), "Server Version".grey(), info.major, info.minor, "OK".green()),
-                Err(err) => print_error(err)
-            };
+        Ok(config) => {
+            inspect_proxy_reachable(&config.proxy_url).await;
+            inspect_server_reachable(config.clone()).await;
+            inspect_server_auth(config.clone()).await;
         },
-        Err(err) => print_kubeconfigerror(err)
+        Err(err) => print_error(expand_kubeconfigerror(err))
     }
 }
 
-async fn is_url_reachable(url: &http::Uri) -> bool {
-    let port = url.port_u16().unwrap_or_else(|| match url.scheme_str() {
-        Some("https") => 443,
-        _ => 80
+async fn inspect_server_auth(mut config: Config) {
+    config.connect_timeout = Some(std::time::Duration::from_secs(5));
+    let version = match Client::try_from(config) {
+        Ok(c) => c.apiserver_version().await,
+        Err(err) => Err(err)
+    };
+
+    match version {
+        Ok(info) => println!("{} {} v{}.{} - {}", green_check(), "Server Version".grey(), info.major, info.minor, "OK".green()),
+        Err(err) => print_error(expand_kubeerror(err))
+    };
+}
+
+async fn inspect_server_reachable(mut config: Config) {
+    config.connect_timeout = Some(std::time::Duration::from_secs(5));
+
+    // Reset the auth info to force a 403 error if the server is reachable
+    config.auth_info.username = None;
+    config.auth_info.password = None;
+    config.auth_info.token = None;
+    config.auth_info.token_file = None;
+    config.auth_info.client_certificate = None;
+    config.auth_info.client_certificate_data = None;
+    config.auth_info.client_key = None;
+    config.auth_info.client_key_data = None;
+    config.auth_info.impersonate = None;
+    config.auth_info.impersonate_groups = None;
+    config.auth_info.auth_provider = None;
+    config.auth_info.exec = None;
+
+    let reachable = match Client::try_from(config.clone()) {
+        Ok(c) => { 
+            let req = Request::builder().uri("/").body(vec![]).map_err(kube::Error::HttpError);
+            match req {
+                Ok(req) => { 
+                    let res = c.request_text(req).await;
+                    match res {
+                        Ok(_) => Ok(true),
+                        Err(err) => {
+                            if let kube::Error::Api(e) = err {
+                                // Server is reachable as long as the HTTP status code is not a server error
+                                Ok(e.code < 500)
+                            } else {
+                                Err(err)
+                            }
+                        }
+                    }
+                },
+                Err(err) => Err(err)
+            }
+        },
+        Err(err) => Err(err)
+    };
+
+    println!("{} {}: {} - {}", match reachable { 
+        Ok(_) => green_check(),
+        Err(_) => red_cross()
+    }, "Server URL".grey(), config.cluster_url.to_string(), match reachable {
+        Ok(_) => "reachable".green(),
+        Err(_) => "unreachable".red()
     });
-    let host = url.host().unwrap_or_default();
+}
 
-    let socket_addr = format!("{}:{}", host, port);
+async fn inspect_proxy_reachable(url: &Option<http::Uri>) {
+    match &url {
+        Some(url) => {
+            let port = url.port_u16().unwrap_or_else(|| match url.scheme_str() {
+                Some("https") => 443,
+                _ => 80
+            });
 
-    match tokio::time::timeout(Duration::from_secs(3), tokio::net::TcpStream::connect(socket_addr)).await {
-        Ok(Ok(_)) => true,
-        _ => false
+            let host = url.host().unwrap_or_default();
+            let socket_addr = format!("{}:{}", host, port);
+        
+            let reachable =match tokio::time::timeout(Duration::from_secs(3), tokio::net::TcpStream::connect(socket_addr)).await {
+                Ok(Ok(_)) => true,
+                _ => false
+            };
+
+            println!("{} {}: {} - {}", match reachable { 
+                true => green_check(),
+                false => red_cross()
+            }, "Proxy".grey(), url.to_string(), match reachable {
+                true => "reachable".green(),
+                false => "unreachable".red()
+            });
+        },
+        None => println!("{} {}: {}", green_check(), "Proxy".grey(), "<not set>".light_grey())
     }
 }
 

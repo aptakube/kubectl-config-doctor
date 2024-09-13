@@ -4,7 +4,7 @@ mod style;
 use std::{env, ffi::OsString, path::PathBuf};
 
 use kube::config::{Kubeconfig, KubeconfigError};
-use style::{print_kubeconfigerror, print_title};
+use style::{expand_kubeconfigerror, print_error, print_title};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("");
             }
         },
-        Err(err) => print_kubeconfigerror(err)
+        Err(err) => print_error(expand_kubeconfigerror(err))
     }
 
     Ok(())
@@ -59,7 +59,6 @@ fn files_from_env(value: &OsString) -> Vec<PathBuf> {
 
     paths
 }
-
 
 fn files_from_default_path() -> Vec<PathBuf> {
     let path = home::home_dir().expect("could not get user HOME dir").join(".kube").join("config");

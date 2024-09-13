@@ -2,7 +2,7 @@
 name = "kubectl-config-doctor"
 authors = ["Guilherme Oenning <goenning@aptakube.com>"]
 description = "Kubectl plugin to validate kubeconfigs"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 keywords = ["kubectl"]
 license = "MIT"

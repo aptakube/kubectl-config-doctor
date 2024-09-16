@@ -5,30 +5,30 @@ metadata:
 spec:
   version: {{ .TagName }}
   shortDescription: Validate and test kubeconfigs 
-  homepage: https://github.com/aptakube/kubeclt-config-doctor
+  homepage: https://github.com/aptakube/kubectl-config-doctor
   description: This plugin validates and test different kubeconfigs settings 
   platforms:
   - bin: ./kubectl-config-doctor.exe
+    {{addURIAndSha "https://github.com/aptakube/kubectl-config-doctor/releases/download/{{ .TagName }}/kubectl-config-doctor-windows-amd64.zip" .TagName }}
     selector:
       matchLabels:
         os: windows
         arch: amd64
-    {{addURIAndSha "https://github.com/aptakube/kubectl-config-doctor/releases/download/{{ .TagName }}/kubectl-config-doctor-windows-amd64.zip" .TagName }}
   - bin: ./kubectl-config-doctor
+    {{addURIAndSha "https://github.com/aptakube/kubectl-config-doctor/releases/download/{{ .TagName }}/kubectl-config-doctor-linux-amd64.tar.gz" .TagName }}
     selector:
       matchLabels:
         os: linux
         arch: amd64
-    {{addURIAndSha "https://github.com/aptakube/kubectl-config-doctor/releases/download/{{ .TagName }}/kubectl-config-doctor-linux-amd64.tar.gz" .TagName }}
   - bin: ./kubectl-config-doctor
+    {{addURIAndSha "https://github.com/aptakube/kubectl-config-doctor/releases/download/{{ .TagName }}/kubectl-config-doctor-darwin-amd64.tar.gz" .TagName }}
     selector:
       matchLabels:
         os: darwin
         arch: amd64
-    {{addURIAndSha "https://github.com/aptakube/kubectl-config-doctor/releases/download/{{ .TagName }}/kubectl-config-doctor-darwin-amd64.tar.gz" .TagName }}
   - bin: ./kubectl-config-doctor
+    {{addURIAndSha "https://github.com/aptakube/kubectl-config-doctor/releases/download/{{ .TagName }}/kubectl-config-doctor-darwin-arm64.tar.gz" .TagName }}
     selector:
       matchLabels:
         os: darwin
         arch: arm64
-    {{addURIAndSha "https://github.com/aptakube/kubectl-config-doctor/releases/download/{{ .TagName }}/kubectl-config-doctor-darwin-arm64.tar.gz" .TagName }}

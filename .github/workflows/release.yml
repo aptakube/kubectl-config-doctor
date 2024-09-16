@@ -57,3 +57,9 @@ jobs:
           file: ${{ matrix.asset_name }}
           asset_name: ${{ matrix.asset_name }}
           tag: ${{ github.ref }}
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update new version in krew-index
+        uses: rajatjindal/krew-release-bot@v0.0.46

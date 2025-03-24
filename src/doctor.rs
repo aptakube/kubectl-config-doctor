@@ -262,11 +262,12 @@ fn find_context(config: &Kubeconfig, context: &String) -> (String, Option<Cluste
         .find(|x| &x.name == &current_context.cluster)
         .and_then(|x| x.cluster.clone());
 
+    let user = current_context.user.unwrap_or_default();
     let auth_info = config
         .auth_infos
         .iter()
-        .find(|x| &x.name == &current_context.user)
+        .find(|x| x.name == user)
         .and_then(|x| x.auth_info.clone());
 
-    return (current_context.cluster, cluster, current_context.user, auth_info);
+    return (current_context.cluster, cluster, user, auth_info);
 }

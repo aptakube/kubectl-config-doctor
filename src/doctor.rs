@@ -202,7 +202,7 @@ fn inspect_cluster(name: String, cluster: Option<Cluster>) {
                     true => green_check(),
                     false => red_cross()
                 }, "Cluster Certificate:".grey(), cert, match exists {
-                    true => "exists".red(),
+                    true => "exists".green(),
                     false => "file not found".red()
                 });
             } else if let Some(cert) = &cluster.certificate_authority_data {

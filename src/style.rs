@@ -29,8 +29,8 @@ pub fn print_title(title: &str) {
     println!("{}", title.bold());
 }
 
-pub fn print_error(err: String) {
-    println!("{} {}", red_cross(), err.red());
+pub fn print_error(prefix: &str, err: String) {
+    println!("{} {}: {}", red_cross(), prefix.grey(), err.red());
 }
 
 pub fn expand_kubeerror(err: kube::Error) -> String {

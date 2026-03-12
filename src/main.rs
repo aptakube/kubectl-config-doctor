@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("");
             }
         },
-        Err(err) => print_error(expand_kubeconfigerror(err))
+        Err(err) => print_error("Merge Kubeconfigs", expand_kubeconfigerror(err))
     }
 
     Ok(())

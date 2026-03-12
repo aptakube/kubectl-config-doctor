@@ -21,14 +21,14 @@ name = "kubectl-config-doctor"
 path = "src/main.rs"
 
 [dependencies]
-colored = "3.0.0"
-home = "0.5.9"
-http = "1.1.0"
-k8s-openapi = { version = "=0.25.0", features = ["v1_30"] }
-kube = { version = "1.1.0", features = ["config", "client", "rustls-tls", "aws-lc-rs", "socks5", "http-proxy", "oidc"] }
-rustls = { version = "=0.23.22",  default-features = false, features = [] }
+colored = "3.1.1"
+home = "0.5.12"
+http = "1.4.0"
+k8s-openapi = { version = "=0.27.0", features = ["v1_31"] }
+kube = { version = "=3.0.1", default-features = false, features = ["config", "client", "rustls-tls", "aws-lc-rs", "socks5", "http-proxy", "oidc"] }
+rustls = { version = "0.23.37",  default-features = false, features = [] }
 secrecy = "0.10.3"
-tokio = { version = "=1.46.1", features = ["full"] }
+tokio = { version = "=1.50.0", features = ["full"] }
 
 [profile.release]
 panic = "abort"

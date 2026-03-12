@@ -2,7 +2,8 @@ use std::{env, path::PathBuf, time::Duration};
 
 use colored::Colorize;
 use http::Request;
-use kube::{config::{AuthInfo, Cluster, KubeConfigOptions, Kubeconfig}, Client, Config};
+use k8s_openapi::api::{apps::v1::Deployment, core::v1::{Node, Pod}};
+use kube::{Api, Client, Config, api::ListParams, config::{AuthInfo, Cluster, KubeConfigOptions, Kubeconfig}};
 use secrecy::{ExposeSecret, SecretString};
 
 use crate::style::{expand_kubeconfigerror, expand_kubeerror, green_check, print_error, red_cross, ColorizeExt};
@@ -93,25 +94,57 @@ pub async fn inspect_context(kubeconfig: &Kubeconfig, context: String) {
     }).await;
 
     match config {
-        Ok(config) => {
+        Ok(mut config) => {
             inspect_proxy_reachable(&config.proxy_url).await;
             inspect_server_reachable(config.clone()).await;
-            inspect_server_auth(config.clone()).await;
+
+            config.connect_timeout = Some(std::time::Duration::from_secs(5));
+            match Client::try_from(config) {
+                Ok(c) => {
+                    inspect_server_auth(c.clone()).await;
+                    count_pods(c.clone()).await;
+                    count_deployments(c.clone()).await;
+                    count_nodes(c.clone()).await;
+                }
+                Err(err) => print_error("Create Client", expand_kubeerror(err))
+            };
+
         },
-        Err(err) => print_error(expand_kubeconfigerror(err))
+        Err(err) => print_error("Read Config", expand_kubeconfigerror(err))
     }
 }
 
-async fn inspect_server_auth(mut config: Config) {
-    config.connect_timeout = Some(std::time::Duration::from_secs(5));
-    let version = match Client::try_from(config) {
-        Ok(c) => c.apiserver_version().await,
-        Err(err) => Err(err)
-    };
-
-    match version {
+async fn inspect_server_auth(client: Client) {
+    match client.apiserver_version().await {
         Ok(info) => println!("{} {} v{}.{} - {}", green_check(), "Server Version".grey(), info.major, info.minor, "OK".green()),
-        Err(err) => print_error(expand_kubeerror(err))
+        Err(err) => print_error("Server Version", expand_kubeerror(err))
+    };
+}
+
+async fn count_pods(client: Client) {
+    let pods: Api<Pod> = Api::all(client);
+
+    match pods.list(&ListParams::default()).await {
+        Ok(pods) => println!("{} {}: {} - {}", green_check(), "Pods Count".grey(), pods.items.len(), "OK".green()),
+        Err(err) => print_error("Pods Count", expand_kubeerror(err))
+    };
+}
+
+async fn count_nodes(client: Client) {
+    let nodes: Api<Node> = Api::all(client);
+
+    match nodes.list(&ListParams::default()).await {
+        Ok(nodes) => println!("{} {}: {} - {}", green_check(), "Nodes Count".grey(), nodes.items.len(), "OK".green()),
+        Err(err) => print_error("Nodes Count", expand_kubeerror(err))
+    };
+}
+
+async fn count_deployments(client: Client) {
+    let deployments: Api<Deployment> = Api::all(client);
+
+    match deployments.list(&ListParams::default()).await {
+        Ok(deployments) => println!("{} {}: {} - {}", green_check(), "Deployments Count".grey(), deployments.items.len(), "OK".green()),
+        Err(err) => print_error("Deployments Count", expand_kubeerror(err))
     };
 }
 
